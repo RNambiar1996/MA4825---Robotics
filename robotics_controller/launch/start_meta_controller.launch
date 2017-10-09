@@ -2,17 +2,27 @@
 
 <launch>
     <!-- Load controller configuration to parameter server -->
-    <rosparam file="$(find robotics_controller)/config/dynamixel_joint_controllers.yaml" command="load"/>
+    <rosparam file="$(find robotics_controller)/params/tilt.yaml" command="load"/>
     
     <!-- start specified joint controllers -->
-    <node name="dynamixel_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+    <node name="controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
           args="--manager=dxl_manager
-                --port=pan_tilt_port
-                --type=simple
-		joint1_controller
+                --port dxl_port
+                joint1_controller
 		joint2_controller
-		joint3_controller
-		joint4_controller
-		joint5_controller"
+		joint3_controller"
           output="screen"/>
+
+  <rosparam file="$(find robotics_controller)/params/joints_trajectory_controller.yaml" command="load"/>
+  <node name="controller_spawner_meta" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --type=meta
+		f_arm
+                joint1_controller
+		joint2_controller
+		joint3_controller"
+          output="screen"/>
+
+
+   	
 </launch>
