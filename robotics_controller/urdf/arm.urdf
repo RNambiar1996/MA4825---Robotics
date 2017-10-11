@@ -1,5 +1,264 @@
 <?xml version="1.0"?>
-<robot name="holobot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="arm_v1" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+
+	<!-- BASE COMPONENTS -->
+	<!-- ***********************************************************************************************-->
+
+	<!-- Base Servo -->
+	<link name="ax12a_1">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/AX12.STL"/>
+			</geometry>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.05 0.0425 0.032"/>
+			</geometry>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+		</collision>
+		<inertial>	
+			<mass value="0.1"/>
+			<inertia ixx="0.022" ixy="0.0" ixz="-0.0104" iyy="0.034681" iyz="0.0" izz="0.017194"/>
+		</inertial>
+	</link>
+
+	<!--Base piece to servo joint -->
+	<joint name="ax_12_to_base" type="revolute">
+		<parent link="ax12a_1"/>
+		<child link="cradle_base"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<limit lower="0.0" upper="3.14" effort="5.0" velocity="1.0"/>
+	</joint>
+
+	<!-- Base Piece -->	
+	<link name="cradle_base">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/cradle_base.STL"/>
+			</geometry>
+			<origin rpy="0 0 0"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.08623 0.115 0.006"/>
+			</geometry> 
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+		</collision>
+		<inertial>
+			<mass value="0.06476"/>
+			<inertia ixx="0.000043016" ixy="0.0" ixz="0.0" iyy="0.000072639" iyz="0.00" izz="0.000114101"/>
+		</inertial>
+	</link>
+
+	<!-- ***********************************************************************************************-->
+
+	<!-- LEFT COMPONENTS -->
+	<!-- ***********************************************************************************************-->
+	<!--Base to left joint -->
+	<joint name="base_to_left" type="fixed">
+		<parent link="cradle_base"/>
+		<child link="rectangular_side_part"/>
+		<origin xyz="-0.054 0.02756 0.060" rpy="0 1.57 0"/>
+	</joint>
+
+
+	<!--Side link-->
+	<link name="rectangular_side_part">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/rectangular_side_part.STL"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 3.14 0"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.090 0.12232 0.006"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+		</collision>
+		<inertial>
+			<mass value="0.07043"/>
+			<inertia ixx="0.000145" ixy="0.000038" ixz="0.00" iyy="0.0000755" iyz="0.00" izz="0.000219"/>
+		</inertial>
+	</link>
+
+	<!-- Joint between left side servo and rectangular.. piece -->
+	<joint name="left_servo_fixed" type="fixed">
+		<parent link="rectangular_side_part"/>
+		<child link="ax12a_2"/>
+		<origin xyz = "0 0 0" rpy="0 0 1.57"/>
+	</joint>
+
+	<!-- Left side servo -->
+	<link name="ax12a_2">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/AX12.STL"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.05 0.0425 0.032"/>
+			</geometry>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+		</collision>
+		<inertial>	
+			<mass value="0.1"/>
+			<inertia ixx="0.022" ixy="0.0" ixz="-0.0104" iyy="0.034681" iyz="0.0" izz="0.017194"/>
+		</inertial>
+	</link>
+	
+
+	<!-- joint from servo to servo mounting arm -->
+	<joint name="ax_12_left_to_lever" type="revolute">
+		<parent link="ax12a_2"/>
+		<child link="servo_mounting_arm"/>
+		<origin xyz="0 0 0.006" rpy="0 0 0"/>
+		<limit lower="0.0" upper="3.14" effort="5.0" velocity="1.0"/>
+	</joint>
+	
+
+	<!-- Servo mounting arm -->
+	<link name="servo_mounting_arm">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/servo_mounting_arm.STL"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0.0"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.092 0.028 0.006"/>
+			</geometry>
+			<origin xyz="0 0 0.0" rpy="0 0 0.0"/>
+		</collision>
+		<inertial>	
+			<mass value="0.011"/>
+			<inertia ixx="0.0000279" ixy="0.00" ixz="0.00" iyy="0.00" iyz="0.00" izz="0.0000282"/>
+		</inertial>
+	</link>
+
+	<!-- Joint from servo arm to straight lever -->
+	<joint name="servo_arm_to_straight_lever" type="continuous">
+		<parent link="servo_mounting_arm"/>
+		<child link="straight_lever"/>
+		<origin xyz="0 0.07 0.0" rpy="0 0 -1.0"/>
+	</joint>
+
+
+	<!-- Straight lever arm -->
+	<link name="straight_lever">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/straight_lever.STL"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0.0"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.172 0.016 0.006"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0.0"/>
+		</collision>
+		<inertial>
+			<mass value="0.01901"/>
+			<inertia ixx="0.000159" ixy="0.00" ixz="0.00" iyy="0.00" iyz="0.00" izz="0.000160"/>
+		</inertial>
+	</link>
+
+	<!-- joint from straight lever arm to forearm lever -->
+	<joint name="straight_to_forearm" type="continuous">
+		<parent link="straight_lever"/>		
+		<child link="forearm_lever"/>
+		<origin xyz="0 0.156 0" rpy="0 0 -0.5"/>
+	</joint>	
+
+	<!--Forearm lever -->
+	<link name="forearm_lever">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/forearm_lever.STL"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0.0"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.248 0.03 0.006"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0.0"/>
+		</collision>
+		<inertial>
+			<mass value="0.0325"/>
+			<inertia ixx="0.000598" ixy="0.00" ixz="0.00" iyy="0.00" iyz="0.0000114" izz="0.00599"/>
+		</inertial>
+	</link>
+	<!--- ********************************************************************************************** -->
+
+	<!-- RIGHT SIDE COMPONENTS -->
+	<!--- ********************************************************************************************** -->
+	
+
+	<!-- joint between cradle base and rh_side-->
+	<joint name="base_to_right" type="fixed">
+		<parent link="cradle_base"/>
+		<child link="rh_side"/>
+		<origin xyz="0.0515 0.02756 0.060" rpy="0 -1.57 0"/>
+	</joint>
+
+	<!-- Right hand side servo mount -->
+	<link name="rh_side">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/rh_side.STL"/>
+			</geometry>			
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.10783 0.12232 0.006"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+		</collision>
+		<inertial>
+			<mass value="0.07441"/>
+			<inertia ixx="0.000162" ixy="0.00" ixz="0.00" iyy="0.0000801" iyz="0.00" izz="0.000240"/>
+		</inertial>	
+	</link>
+
+	<!-- Joint between servo and right hand side -->
+	<joint name="rh_side_to_ax12a_3" type="fixed">
+		<parent link="rh_side"/>
+		<child link="ax12a_3"/>
+		<origin xyz="0 0 0" rpy="0 0 1.57"/>
+	</joint>
+
+	
+	<!-- Third servo -->
+	<link name="ax12a_3">
+		<visual>
+			<geometry>
+				<mesh filename="package://robotics_controller/meshes/AX12.STL"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.05 0.0425 0.032"/>
+			</geometry>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+		</collision>
+		<inertial>	
+			<mass value="0.1"/>
+			<inertia ixx="0.022" ixy="0.0" ixz="-0.0104" iyy="0.034681" iyz="0.0" izz="0.017194"/>
+		</inertial>
+	</link>
+
+	
+
+	<!--- ********************************************************************************************** -->
+</robot>
 
 
