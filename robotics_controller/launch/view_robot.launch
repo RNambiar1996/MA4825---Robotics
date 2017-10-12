@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <launch>
-
-	<arg name="gui" default="false"/>
-	<param name="robot_description" textfile="$(find robotics_controller)/urdf/arm.urdf"/>
-
-	<param name="use_gui" value="$(arg gui)"/>
-
-	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
-
-	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
-
+	<arg name="model" default="$(find robotics_controller)/urdf/arm.urdf"/>
+	<arg name="gui" default="True" />
 	<arg name="viz_config" default="$(find robotics_controller)/rviz_params/view_arm.rviz" />
 
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg viz_config)" respawn="false" />
-	
+	<param name="robot_description" textfile="$(arg model)" />
 
+	<param name="use_gui" value="$(arg gui)" />
+
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg viz_config)" respawn="false" />
+
+	 
 </launch>

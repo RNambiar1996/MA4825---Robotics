@@ -1,73 +1,4 @@
-<?xml version="1.0"?>
-<robot name="arm_v1" xmlns:xacro="http://www.ros.org/wiki/xacro">
-
-
-	<!-- BASE COMPONENTS -->
-	<!-- ***********************************************************************************************-->
-
-	<!--footprint -->
-	<link name="footprint">
-		<collision>
-			<geometry>
-				<box size="0.001 0.0001 0.001"/>
-			</geometry>
-			<origin xyz="0 0 0" rpy="0 0 0"/>
-		</collision>
-	</link>
-
-	<joint name="servo_to_footprint" type="fixed">
-		<parent link="footprint"/>
-		<child link="ax12a_1"/>
-		<origin xyz="0 0 0.032" rpy="0 0 0"/>
-	</joint>
-
-	<!-- Base Servo -->
-	<link name="ax12a_1">
-		<visual>
-			<geometry>
-				<mesh filename="package://robotics_controller/meshes/AX12.STL"/>
-			</geometry>
-		</visual>
-		<collision>
-			<geometry>
-				<box size="0.05 0.0425 0.032"/>
-			</geometry>
-			<origin xyz="0 0 0.0" rpy="0 0 0"/>
-		</collision>
-		<inertial>	
-			<mass value="0.1"/>
-			<inertia ixx="0.022" ixy="0.0" ixz="-0.0104" iyy="0.034681" iyz="0.0" izz="0.017194"/>
-		</inertial>
-	</link>
-
-	<!--Base piece to servo joint -->
-	<joint name="ax_12_to_base" type="revolute">
-		<parent link="ax12a_1"/>
-		<child link="cradle_base"/>
-		<origin xyz="0 0 0" rpy="0 0 0"/>
-		<limit lower="0.0" upper="3.14" effort="5.0" velocity="1.0"/>
-		<axis xyz="0 0 1"/>
-	</joint>
-
-	<!-- Base Piece -->	
-	<link name="cradle_base">
-		<visual>
-			<geometry>
-				<mesh filename="package://robotics_controller/meshes/cradle_base.STL"/>
-			</geometry>
-			<origin rpy="0 0 0"/>
-		</visual>
-		<collision>
-			<geometry>
-				<mesh filename="package://robotics_controller/meshes/cradle_base.STL"/>
-			</geometry> 
-			<origin xyz="0 0 0" rpy="0 0 0"/>
-		</collision>
-		<inertial>
-			<mass value="0.06476"/>
-			<inertia ixx="0.000043016" ixy="0.0" ixz="0.0" iyy="0.000072639" iyz="0.00" izz="0.000114101"/>
-		</inertial>
-	</link>
+<!--
 
 	<!-- ***********************************************************************************************-->
 
@@ -131,7 +62,7 @@
 
 	<!-- joint from servo to servo mounting arm -->
 	<joint name="ax_12_left_to_lever" type="revolute">
-		<parent link="rectangular_side_part"/>
+		<parent link="ax12a_2"/>
 		<child link="servo_mounting_arm"/>
 		<origin xyz="0 0 0.006" rpy="0 0 0"/>
 		<limit lower="0.0" upper="3.14" effort="5.0" velocity="1.0"/>
@@ -372,6 +303,4 @@
 	</link>
 	
 	<!--- ********************************************************************************************** -->
-</robot>
-
 

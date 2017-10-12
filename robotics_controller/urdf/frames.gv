@@ -1,0 +1,18 @@
+digraph G {
+"cradle_base" -> "rectangular_side_part"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1507738828.526 sec old)\nBuffer length: 0.000 sec\n"];
+"ax12a_1" -> "cradle_base"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10.204 Hz\nMost recent transform: 1507738828.504 ( 0.022 sec old)\nBuffer length: 4.900 sec\n"];
+"cradle_base" -> "rh_side"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1507738828.526 sec old)\nBuffer length: 0.000 sec\n"];
+"rectangular_side_part" -> "ax12a_2"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1507738828.526 sec old)\nBuffer length: 0.000 sec\n"];
+"rh_side" -> "ax12a_3"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1507738828.526 sec old)\nBuffer length: 0.000 sec\n"];
+"footprint" -> "ax12a_1"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1507738828.526 sec old)\nBuffer length: 0.000 sec\n"];
+"ax12a_2" -> "servo_mounting_arm"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10.204 Hz\nMost recent transform: 1507738828.504 ( 0.022 sec old)\nBuffer length: 4.900 sec\n"];
+"central_lever" -> "triangular_piece"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10.204 Hz\nMost recent transform: 1507738828.504 ( 0.022 sec old)\nBuffer length: 4.900 sec\n"];
+"ax12a_3" -> "central_lever"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10.204 Hz\nMost recent transform: 1507738828.504 ( 0.022 sec old)\nBuffer length: 4.900 sec\n"];
+"rh_side" -> "straight_lever_2"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10.204 Hz\nMost recent transform: 1507738828.504 ( 0.022 sec old)\nBuffer length: 4.900 sec\n"];
+"servo_mounting_arm" -> "straight_lever"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10.204 Hz\nMost recent transform: 1507738828.504 ( 0.022 sec old)\nBuffer length: 4.900 sec\n"];
+"straight_lever" -> "forearm_lever"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10.204 Hz\nMost recent transform: 1507738828.504 ( 0.022 sec old)\nBuffer length: 4.900 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1507738828.526"[ shape=plaintext ] ;
+ }->"footprint";
+}
