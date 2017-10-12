@@ -1,3 +1,6 @@
+<!-- -*- mode: XML -*- -->
+
+
 <launch>
 
 	<!-- Start tilt joint controller -->
@@ -8,4 +11,6 @@
 		      tilt_controller"
 		output="screen"/>
 
+	
+	
 </launch>

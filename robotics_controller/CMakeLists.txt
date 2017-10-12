@@ -19,8 +19,16 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 add_message_files(
+  DIRECTORY msg
   FILES
   Potentiometer.msg
+  Trajectory.msg
+)
+
+add_service_files(
+   DIRECTORY srv
+   FILES
+   move_arm.srv
 )
 
 generate_messages(
