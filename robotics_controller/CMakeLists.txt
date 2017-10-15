@@ -21,8 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   DIRECTORY msg
   FILES
-  Potentiometer.msg
   Trajectory.msg
+  Task.msg
 )
 
 add_service_files(
