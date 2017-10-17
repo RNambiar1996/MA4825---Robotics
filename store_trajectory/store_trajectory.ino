@@ -16,8 +16,8 @@ ros::NodeHandle nh;
 #define POT_2 A2
 #define POT_3 A3
 
-#define BUTTON1 7
-#define BUTTON2 8
+#define BUTTON1 4
+#define BUTTON2 6
 
 
 float pot1_value;
@@ -55,6 +55,8 @@ void setup()
 
 void loop()
 {
+  int i = 0;
+  
   present = millis();
   
   pot1_value = analogRead(POT_1);
@@ -64,14 +66,20 @@ void loop()
   button1_state = digitalRead(BUTTON1);
   button2_state = digitalRead(BUTTON2);
 
+  //Serial.print("Button1 state: ");
+  //Serial.println(button1_state);
+
+  //Serial.print("Button2 state: ");
+  //Serial.println(button2_state);
+
   Serial.print("Pot 1 value: ");
   Serial.println(pot1_value);
 
-  Serial.print("Pot 2 value: ");
-  Serial.println(pot2_value);
+  //Serial.print("Pot 2 value: ");
+  //Serial.println(pot2_value);
 
-  Serial.print("Pot 3 value: ");
-  Serial.println(pot3_value);
+  //Serial.print("Pot 3 value: ");
+  //Serial.println(pot3_value);
   
   trajectory.joint_1 = pot1_value;
   trajectory.joint_2 = pot2_value;
@@ -83,22 +91,15 @@ void loop()
 
   pub_trajectory.publish(&trajectory);
   
-  //Serial.print("Button1 State: ");
-  //Serial.println(button1_state);
-  //Serial.print("Button2 State: ");
-  //Serial.println(button2_state);
-      
   if(button1_state==1)
   {
     t_delta_traj = present - past_trajectory;
 
     if(t_delta_traj>150)
     {
-      Serial.println(trajectoryCounter);
       task.joint_values[trajectoryCounter] = trajectory;
-      Serial.println(task.joint_values[trajectoryCounter].joint_1);
-      Serial.println("Joint values stored");
-      Serial.print("Trajectory Counter value: ");
+      Serial.println("Trajectory Stored");
+      Serial.print("Trajectory Counter: ");
       Serial.println(trajectoryCounter++);
     } 
 
@@ -111,11 +112,17 @@ void loop()
 
     if(t_delta_task>150)
     {
-      
-      Serial.println("Task stored");
-      Serial.print("Task Counter Value: ");
+
+      for(i=0;i<trajectoryCounter;i++)
+      {
+        Serial.println(task.joint_values[i].joint_1);
+      }
+      Serial.println("Task Stored");
+      Serial.print("Task Counter: ");
       Serial.println(taskCounter++);
-    
+      Serial.print("No of points in task: ");
+      Serial.println(trajectoryCounter);
+      task.nTraj = trajectoryCounter;
       pub_task.publish(&task);
       trajectoryCounter = 0;
     }
@@ -127,6 +134,5 @@ void loop()
   delay(100);
  
   nh.spinOnce();
-
 
 }

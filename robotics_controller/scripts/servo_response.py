@@ -5,6 +5,7 @@ roslib.load_manifest('robotics_controller')
 import rospy
 import actionlib
 import sys, os, fcntl, time
+import termios
 
 from std_msgs.msg import Float64
 import trajectory_msgs.msg 
@@ -44,28 +45,36 @@ class TaskSelector():
 		self.nTasks = nTasks
 		self.arm = Joint("f_arm") 
 		self.fl = fcntl.fcntl(sys.stdin.fileno(), fcntl.F_GETFL)
-		fcntl.fcntl(sys.stdin.fileno(), fcntl.F_SETFL, self.fl | os.O_NONBLOCK)
+		fcntl.fcntl(sys.stdin.fileno(), fcntl.F_SETFL, self.fl | os.O_NONBLOCK)		
 
-		print("No of tasks: " +str(len(tasks)))
+		moveArm = rospy.Service("move_arm", move_arm, self.moveArm)
 
-	def start(self):
-				
-		print("Executing tasks")
-		print("No of tasks: " +str(self.nTasks))
-				
+	
+	def moveArm(self, req):
+		
+		choice_task = req.nTask
 
-		for task in self.tasks:
-			for joint_values in task.joint_values:
-				j1 = joint_values.joint_1
-				j2 = joint_values.joint_2
-				j3 = joint_values.joint_3
+		task = self.tasks[choice_task-1]
+		nTraj = task.nTraj
 
-				j1 = (j1/1007)*3.14159
-				j2 = (j2/1007)*3.14159
-				j3 = (j3/1007)*3.14159
+		for i in range(0, nTraj):
 
-				self.arm.move_joint([j1, j2, j3])
-				
+			j1 = task.joint_values[i].joint_1
+			j2 = task.joint_values[i].joint_2
+			j3 = task.joint_values[i].joint_3
+
+			j1 = (j1/950)*3.14159
+			j2 = (j2/950)*3.14159
+			j3 = (j3/950)*3.14159
+
+			self.arm.move([j1,j2,j3])	
+
+		resp = move_armResponse()
+		resp.success = True
+
+		return resp
+	
+
 			
 class ServoResponse():
 
@@ -119,7 +128,6 @@ class ServoResponse():
 			self.sub_tasks.unregister()
 
 			self.task_selector = TaskSelector(self.tasks, self.nTasks)
-			self.task_selector.start()
 
 			
 

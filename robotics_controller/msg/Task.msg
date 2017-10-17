@@ -1,1 +1,2 @@
-robotics_controller/Trajectory[] joint_values
+robotics_controller/Trajectory[10] joint_values
+int32 nTraj
