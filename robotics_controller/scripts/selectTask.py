@@ -5,7 +5,7 @@ roslib.load_manifest('robotics_controller')
 import rospy
 import actionlib
 import sys, os, fcntl, time
-import termios
+import termios, tty, select
 
 from std_msgs.msg import Float64
 import trajectory_msgs.msg 
@@ -16,7 +16,7 @@ from control_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal, FollowJ
 from robotics_controller.msg import Trajectory
 from robotics_controller.msg import Task
 from robotics_controller.srv import move_armResponse
-
+from robotics_controller.srv import move_arm
 
 def isData():
 	
@@ -24,35 +24,32 @@ def isData():
 
 def main():
 
+
+	print "Waiting for tasks to load up...."
 	rospy.wait_for_service("move_arm")
 			
+	print "The wait is over. All tasks have been loaded"
+
 	moveArm = rospy.ServiceProxy("move_arm", move_arm)
 
+	print "You can now enter which task you want to enter" 
+
+	print "If you want to switch to another tasl, press Ctr+C"
 	while True:
 		
-		task = input("Which task do you want the robot to execute")
-
-		print "Enter ESC to stop the arm from executing the task"
+		task = input("Which task do you want the robot to execute: ")
 		
-		old_settings = termios.tcgetattr(sys.stdin)
-
-		try:
-		
-			tty.setcbreak(sys.stdin.fileno())
+		try: 
 			
 			while True:
-
+			
 				resp = moveArm(task)
 
-				if isData():
-
-					c = sys.stdin.read(1)
-
-					if c == '\x1b':
-
-						break
-					
-
+		except KeyboardInterrupt:
+			
+			print "You can now change tasks"
+			
+			
 
 if __name__ == "__main__":
 

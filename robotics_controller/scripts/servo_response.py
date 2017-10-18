@@ -15,6 +15,8 @@ from control_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal, FollowJ
 
 from robotics_controller.msg import Trajectory
 from robotics_controller.msg import Task
+from robotics_controller.srv import move_arm
+from robotics_controller.srv import move_armResponse
 
 
 class Joint:
@@ -54,6 +56,10 @@ class TaskSelector():
 		
 		choice_task = req.nTask
 
+		print "There are " +str(len(self.tasks)) + " tasks stored"
+
+		print "Chosen task: " +str(choice_task)
+
 		task = self.tasks[choice_task-1]
 		nTraj = task.nTraj
 
@@ -67,7 +73,7 @@ class TaskSelector():
 			j2 = (j2/950)*3.14159
 			j3 = (j3/950)*3.14159
 
-			self.arm.move([j1,j2,j3])	
+			self.arm.move_joint([j1,j2,j3])	
 
 		resp = move_armResponse()
 		resp.success = True
