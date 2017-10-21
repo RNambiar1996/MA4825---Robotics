@@ -18,9 +18,6 @@ from robotics_controller.msg import Task
 from robotics_controller.srv import move_armResponse
 from robotics_controller.srv import move_arm
 
-def isData():
-	
-	return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
 
 def main():
 

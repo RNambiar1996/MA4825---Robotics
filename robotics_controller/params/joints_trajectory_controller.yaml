@@ -4,6 +4,6 @@ f_arm:
         module: joint_trajectory_action_controller
         type: JointTrajectoryActionController
     joint_trajectory_action_node:
-        min_velocity: 0.2
+        min_velocity: 0.05
         constraints:
-            goal_time: 1.5
+            goal_time: 0.25

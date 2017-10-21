@@ -10,7 +10,8 @@
                 --port dxl_port
                 joint1_controller
 		joint2_controller
-                joint3_controller"
+                joint3_controller
+                gripper_controller"
           output="screen"/>
 
   <rosparam file="$(find robotics_controller)/params/joints_trajectory_controller.yaml" command="load"/>
@@ -20,7 +21,8 @@
 		f_arm
 		joint1_controller
                 joint2_controller
-                joint3_controller"
+                joint3_controller
+                gripper_controller"
           output="screen"/>
     
 		

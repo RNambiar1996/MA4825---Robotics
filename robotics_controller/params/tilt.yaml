@@ -4,37 +4,48 @@ joint1_controller:
         module: joint_position_controller
         type: JointPositionController
     joint_name: joint_1f
-    joint_speed: 0.2
+    joint_speed: 0.5
     motor:
         id: 6
-        init: 0
-        min: -2047
-        max: 2047
+        init: 340
+        min: 0
+        max: 4096
         
 joint2_controller:
     controller:
         package: dynamixel_controllers
-        module: joint_position_controller_dual_motor
-        type: JointPositionControllerDual
+        module: joint_position_controller
+        type: JointPositionController
     joint_name: joint_2f
-    joint_speed: 1.17
-    motor_master:
+    joint_speed: 0.5
+    motor:
         id: 2
-        init: 0
-        min: -4096
-        max: 0
-    motor_slave:
-        id: 4
-
+        init: 475
+        min: 0
+        max: 4096
+    
 joint3_controller:
     controller:
         package: dynamixel_controllers
         module: joint_position_controller
         type: JointPositionController
     joint_name: joint_3f
-    joint_speed: 0.2
+    joint_speed: 0.5
     motor:
-        id: 3
+        id: 4
         init: 0
-        min: -2047
-        max: 2047
+        min: 0
+        max: 4096
+
+gripper_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: gripper_f
+    joint_speed: 0.5
+    motor:
+        id: 1
+        init: 0
+        min: 0
+        max: 4096

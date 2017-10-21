@@ -18,26 +18,9 @@ from robotics_controller.msg import Task
 from robotics_controller.srv import move_arm
 from robotics_controller.srv import move_armResponse
 
+from dynamixel_controllers.srv import SetSpeed
+from dynamixel_controllers.srv import SetSpeedResponse
 
-class Joint:
-
-	def __init__(self, motor_name):
-		#arm_name should be b_arm or f_arm
-		self.name = motor_name           
-		self.jta = actionlib.SimpleActionClient('/'+self.name+'/follow_joint_trajectory', FollowJointTrajectoryAction)
-		#rospy.loginfo('Waiting for joint trajectory action')
-		self.jta.wait_for_server()
-		#rospy.loginfo('Found joint trajectory action!')
-
-	def move_joint(self, angles):
-		goal = FollowJointTrajectoryGoal()                  
-		char = self.name[0] #either 'f' or 'b'
-		goal.trajectory.joint_names = ['joint_1'+char, 'joint_2'+char, 'joint_3'+char]
-		point = JointTrajectoryPoint()
-		point.positions = angles
-		point.time_from_start = rospy.Duration(0.05)                   
-		goal.trajectory.points.append(point)
-		self.jta.send_goal_and_wait(goal)
 
 
 class TaskSelector():
@@ -45,8 +28,18 @@ class TaskSelector():
 	def __init__(self, tasks, nTasks):
 		self.tasks = tasks
 		self.nTasks = nTasks
-		self.arm = Joint("f_arm") 
 		self.fl = fcntl.fcntl(sys.stdin.fileno(), fcntl.F_GETFL)
+		self.pub_servo_1 = rospy.Publisher("/joint1_controller/command", Float64, queue_size=1)
+		self.pub_servo_2 = rospy.Publisher("/joint2_controller/command", Float64, queue_size=1)
+		self.pub_servo_3 = rospy.Publisher("/joint3_controller/command", Float64, queue_size=1)
+		self.pub_gripper = rospy.Publisher("/gripper_controller/command", Float64, queue_size=1)
+
+		self.servo_1 = Float64()
+		self.servo_2 = Float64()
+		self.servo_3 = Float64()
+		self.gripper = Float64()
+
+		
 		fcntl.fcntl(sys.stdin.fileno(), fcntl.F_SETFL, self.fl | os.O_NONBLOCK)		
 
 		moveArm = rospy.Service("move_arm", move_arm, self.moveArm)
@@ -62,18 +55,54 @@ class TaskSelector():
 
 		task = self.tasks[choice_task-1]
 		nTraj = task.nTraj
-
+		
 		for i in range(0, nTraj):
 
 			j1 = task.joint_values[i].joint_1
 			j2 = task.joint_values[i].joint_2
 			j3 = task.joint_values[i].joint_3
+			g = task.joint_values[i].gripper
 
-			j1 = (j1/950)*3.14159
-			j2 = (j2/950)*3.14159
-			j3 = (j3/950)*3.14159
+			self.servo_1.data = (j1/960)*3.14159
 
-			self.arm.move_joint([j1,j2,j3])	
+			if (j2 > 20 and j2 <= 34):
+				self.servo_2.data = -0.035*j2+2.05
+			elif (j2 > 34 and j2 <= 100):
+				self.servo_2.data = -0.00605*j2+1.05
+			elif (j2 > 100):
+				self.servo_2.data = -0.000517*j2+0.502
+			
+			if self.servo_2.data < 0.0:
+				self.servo_2.data = 0.0
+			if self.servo_2.data > 1.27:
+				self.servo_2.data = 1.345
+		
+			
+
+			self.servo_3.data = -0.07*j3+2.85
+			if self.servo_3.data < 1.1:
+				self.servo_3.data = 1.1
+			if self.servo_3.data > 2.5:
+				self.servo_3.data = 2.5
+
+			self.gripper.data = g
+
+			print "j1: " +str(self.servo_1.data)
+			print "j2: " +str(self.servo_2.data)
+			print "j3: " +str(self.servo_3.data)
+
+			
+			time.sleep(0.01)
+			self.pub_servo_1.publish(self.servo_1)
+			time.sleep(0.01)
+			self.pub_servo_2.publish(self.servo_2)
+			time.sleep(0.01)
+			self.pub_servo_3.publish(self.servo_3)
+			self.pub_gripper.publish(self.gripper)
+
+			time.sleep(2.0)
+
+			
 
 		resp = move_armResponse()
 		resp.success = True
@@ -91,32 +120,91 @@ class ServoResponse():
 		self.servo_1 = Float64()
 		self.servo_2 = Float64()
 		self.servo_3 = Float64()
+		self.gripper = Float64()
 		self.nTasks = nTasks
 		self.taskCounter = 0
+		self.initialised = False
 
-		if self.flag == False:
-			self.sub_trajectory = rospy.Subscriber("trajectory", Trajectory, self.move_arm_callback)
-			self.sub_tasks = rospy.Subscriber("task",Task, self.store_tasks) 
+		setSpeed_j1()
+		setSpeed_j2()
+		setSpeed_j3()
+		setSpeed_gripper()
 
-		self.pub_servo_1 = rospy.Publisher("joint1_controller/command", Float64, queue_size=10)
-		self.pub_servo_2 = rospy.Publisher("joint2_controller/command", Float64, queue_size=10)
-		self.pub_servo_3 = rospy.Publisher("joint3_controller/command", Float64, queue_size=10)
+		self.pub_servo_1 = rospy.Publisher("/joint1_controller/command", Float64, queue_size=1)
+		self.pub_servo_2 = rospy.Publisher("/joint2_controller/command", Float64, queue_size=1)
+		self.pub_servo_3 = rospy.Publisher("/joint3_controller/command", Float64, queue_size=1)
+		self.pub_gripper = rospy.Publisher("/gripper_controller/command", Float64, queue_size=1)
+
+		self.initialise()
+
+		self.sub_trajectory = rospy.Subscriber("trajectory", Trajectory, self.move_arm_callback)
+		self.sub_tasks = rospy.Subscriber("task",Task, self.store_tasks) 
+
+	
+	def initialise(self):
+
+		print "Initialising"
+	 	j1_init = Float64()
+		j2_init = Float64()
+		j3_init = Float64()
+		gripper_init = Float64()
+
+		j1_init.data = 0.0
+		j2_init.data = 0.0
+		j3_init.data = 2.5
+		gripper_init.data = 1.4
+		
+		print("j1 init: "+str(j1_init))
+		print("j2 init: " +str(j2_init))
+
+		time.sleep(2)
+
+		self.pub_servo_1.publish(j1_init)
+		self.pub_servo_2.publish(j2_init)
+		self.pub_servo_3.publish(j3_init)		
+		self.pub_gripper.publish(gripper_init)
+
+		time.sleep(5)
+
+		print "Intialisation complete"
+		self.initialised = True		
 
 	def move_arm_callback(self, trajectory):
 		
 		self.servo_1.data = (trajectory.joint_1/938)*3.14159265359
-		self.servo_2.data = (trajectory.joint_2/938)*3.14159265359
-		self.servo_3.data = (trajectory.joint_3/938)*3.14159265359
 
+
+		#mapping pot2 values to servo values so that equal angle increments are seen in both
+		if (trajectory.joint_2 > 20 and trajectory.joint_2 <= 34):
+			self.servo_2.data = -0.035*trajectory.joint_2+2.05
+		elif (trajectory.joint_2 > 34 and trajectory.joint_2 <= 100):
+			self.servo_2.data = -0.00605*trajectory.joint_2+1.05
+		elif (trajectory.joint_2 > 100):
+			self.servo_2.data = -0.000517*trajectory.joint_2+0.502
+			
+		if self.servo_2.data < 0.0:
+			self.servo_2.data = 0.0
+		if self.servo_2.data > 1.27:
+			self.servo_2.data = 1.345
+			
+
+		self.servo_3.data = -0.07*trajectory.joint_3+2.85
+		if self.servo_3.data < 1.1:
+			self.servo_3.data = 1.1
+		if self.servo_3.data > 2.5:
+			self.servo_3.data =2.5
+
+		self.gripper.data = trajectory.gripper
 		
-		if self.flag == False:
+		if self.flag == False and self.initialised == True:
 			#rospy.logerr("Servo 1 data: " +str(self.servo_1.data))
 			#rospy.logerr("Servo 2 data: " +str(self.servo_2.data))
 			#rospy.logerr("Servo 3 data: " +str(self.servo_3.data))
 			self.pub_servo_1.publish(self.servo_1)
 			self.pub_servo_2.publish(self.servo_2)
 			self.pub_servo_3.publish(self.servo_3)		
-	
+			self.pub_gripper.publish(self.gripper)
+
 	def store_tasks(self, task):
 		
 		print("Task: ")
@@ -136,7 +224,48 @@ class ServoResponse():
 			self.task_selector = TaskSelector(self.tasks, self.nTasks)
 
 			
+#Functions to set speed of arm joints
+def setSpeed_j1():
 
+	rospy.wait_for_service("/joint1_controller/set_speed")
+	print "Setting j1 speed"
+
+	setSpeed = rospy.ServiceProxy("/joint1_controller/set_speed", SetSpeed)
+
+	resp = setSpeed(1.0)	
+
+def setSpeed_j2():
+	
+	rospy.wait_for_service("/joint2_controller/set_speed")
+	
+	print "Setting j2 speed"
+
+	setSpeed = rospy.ServiceProxy("/joint2_controller/set_speed", SetSpeed)
+
+	resp = setSpeed(1.0)
+
+def setSpeed_j3():
+		
+	rospy.wait_for_service("/joint3_controller/set_speed")
+
+	print "Setting j3 speed"
+
+	setSpeed = rospy.ServiceProxy("/joint3_controller/set_speed", SetSpeed)
+
+	resp = setSpeed(1.0)
+	
+
+def setSpeed_gripper():
+	
+	rospy.wait_for_service("/gripper_controller/set_speed")
+
+	print "Setting gripper speed"
+
+	setSpeed = rospy.ServiceProxy("/gripper_controller/set_speed", SetSpeed)
+
+	resp = setSpeed(1.0)
+
+#intialisation function to set all joints to their initial zero values
 			
 def main():
 	
